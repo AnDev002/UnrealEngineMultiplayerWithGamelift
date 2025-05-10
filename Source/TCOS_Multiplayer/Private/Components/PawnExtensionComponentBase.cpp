@@ -1,0 +1,2 @@
+#include "Components/PawnExtensionComponentBase.h"
+
