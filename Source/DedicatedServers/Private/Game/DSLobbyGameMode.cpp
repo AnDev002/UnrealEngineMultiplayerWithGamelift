@@ -6,6 +6,9 @@
 #include "DedicatedServers/DedicatedServers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/DSPlayerController.h"
+#include "Lobby/LobbyPlayerInfo.h"
+#include "Lobby/LobbyState.h"
+#include "Game/DSGameState.h"
 
 ADSLobbyGameMode::ADSLobbyGameMode()
 {
@@ -50,6 +53,11 @@ void ADSLobbyGameMode::Logout(AController* Exiting)
 
 	CancelCountdown();
 	RemovePlayerSession(Exiting);
+	UE_LOG(LogTemp, Warning, TEXT("ADS_LobbyGameMode::Logout for %s"), *Exiting->GetName());
+	if (LobbyStatus != ELobbyStatus::SeamlessTravelling)
+	{
+		RemovePlayerInfoFromLobbyState(Exiting);
+	}
 }
 
 void ADSLobbyGameMode::InitSeamlessTravelPlayer(AController* NewController)
@@ -57,6 +65,12 @@ void ADSLobbyGameMode::InitSeamlessTravelPlayer(AController* NewController)
 	Super::InitSeamlessTravelPlayer(NewController);
 
 	CancelCountdown();
+	UE_LOG(LogTemp, Warning, TEXT("ADS_LobbyGameMode::InitSeamlessTravelPlayer for %s"), *NewController->GetName());
+
+	if (LobbyStatus != ELobbyStatus::SeamlessTravelling)
+	{
+		AddPlayerInfoToLobbyState(NewController);
+	}
 }
 
 void ADSLobbyGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
@@ -80,7 +94,12 @@ FString ADSLobbyGameMode::InitNewPlayer(APlayerController* NewPlayerController, 
 		DSPlayerController->PlayerSessionId = PlayerSessionId;
 		DSPlayerController->Username = Username;
 	}
+	UE_LOG(LogTemp, Warning, TEXT("ADS_LobbyGameMode::InitNewPlayer - PlayerSessionId: %s, Username: %s"), *PlayerSessionId, *Username);
 
+	if (LobbyStatus != ELobbyStatus::SeamlessTravelling)
+	{
+		AddPlayerInfoToLobbyState(NewPlayerController);
+	}
 	return InitializedString;
 }
 
@@ -135,6 +154,26 @@ void ADSLobbyGameMode::SetServerParameters(FServerParameters& OutServerParameter
 	//The PID of the running process
 	OutServerParameters.m_processId = FString::Printf(TEXT("%d"), GetCurrentProcessId());
 	UE_LOG(LogDedicatedServers, Log, TEXT("PID: %s"), *OutServerParameters.m_processId);
+}
+
+void ADSLobbyGameMode::AddPlayerInfoToLobbyState(AController* Player) const
+{
+	ADSPlayerController* DSPlayerController = Cast<ADSPlayerController>(Player);
+	ADSGameState* DSGameState = GetGameState<ADSGameState>();
+	if (IsValid(DSGameState) && IsValid(DSGameState->LobbyState) && IsValid(DSPlayerController))
+	{
+		FLobbyPlayerInfo PlayerInfo(DSPlayerController->Username);
+		DSGameState->LobbyState->AddPlayerInfo(PlayerInfo);
+	}
+}
+void ADSLobbyGameMode::RemovePlayerInfoFromLobbyState(AController* Player) const
+{
+	ADSPlayerController* DSPlayerController = Cast<ADSPlayerController>(Player);
+	ADSGameState* DSGameState = GetGameState<ADSGameState>();
+	if (IsValid(DSGameState) && IsValid(DSGameState->LobbyState) && IsValid(DSPlayerController))
+	{
+		DSGameState->LobbyState->RemovePlayerInfo(DSPlayerController->Username);
+	}
 }
 
 void ADSLobbyGameMode::TryAcceptPlayerSession(const FString& PlayerSessionId, const FString& Username, FString& OutErrorMessage)

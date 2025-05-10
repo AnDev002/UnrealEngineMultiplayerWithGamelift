@@ -4,21 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
-#include "GameFramework/PlayerState.h"
+#include "Player/DSMatchPlayerState.h"
 #include "TCOSPlayerState.generated.h"
 
 class UTCOSAbilitySystemComponent;
 class UTCOSAttributeSet;
 
 UCLASS()
-class TCOS_MULTIPLAYER_API ATCOSPlayerState : public APlayerState, public IAbilitySystemInterface
+class TCOS_MULTIPLAYER_API ATCOSPlayerState : public ADSMatchPlayerState, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 	
 public:
 
 	ATCOSPlayerState();
-
+	virtual void OnMatchEnded(const FString& Username) override;
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	UFUNCTION(BlueprintPure)
@@ -32,5 +32,14 @@ private:
 	
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true)) 
 	TObjectPtr<UTCOSAttributeSet> TCOSAttributes;
+
+
+	int32 Score;
+	int32 Defeats;
+	int32 Hits;
+
+	int32 HighestStreak;
+	bool bFirstBlood;
+	bool bWinner;
 
 };

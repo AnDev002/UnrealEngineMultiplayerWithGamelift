@@ -173,11 +173,6 @@ void UGameSessionsManager::CreatePlayerSession_Response(FHttpRequestPtr Request,
 
 		UGameplayStatics::OpenLevel(this, FName(*IpAndPort), true, Options);
 
-	/*	const FString IpAndPort = PlayerSessionResponse.IpAddress + TEXT(":") + FString::FromInt(PlayerSessionResponse.Port);
-		const FString LevelName = "/Game/ThirdPerson/Maps/Lobby";
-		const FString Options = "?IpAndPort=" + IpAndPort + "&PlayerSessionId=" + PlayerSessionResponse.PlayerSessionId + "&Username=" + PlayerSessionResponse.PlayerId;
-
-		UGameplayStatics::OpenLevel(this, FName(*LevelName), true, Options);*/
 
 	}
 }

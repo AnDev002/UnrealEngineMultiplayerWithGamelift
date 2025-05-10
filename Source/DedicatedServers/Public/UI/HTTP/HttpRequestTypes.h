@@ -259,3 +259,42 @@ struct FDSInitiateAuthResponse
 
 	void Dump() const;
 };
+USTRUCT()
+struct FDSMatchStats
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	int32 score{};
+
+	UPROPERTY()
+	int32 defeats{};
+
+	UPROPERTY()
+	int32 hits{};
+
+	UPROPERTY()
+	int32 highestStreak{};
+
+	UPROPERTY()
+	int32 gotFirstBlood{};
+
+	UPROPERTY()
+	int32 matchWins{};
+
+	UPROPERTY()
+	int32 matchLosses{};
+};
+
+USTRUCT()
+struct FDSRecordMatchStatsInput
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FDSMatchStats matchStats{};
+
+	UPROPERTY()
+	FString username{};
+};
+
